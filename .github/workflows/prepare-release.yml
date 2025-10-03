@@ -87,9 +87,6 @@ jobs:
             # To avoid errors due to multiline notes strings, we encode and decode it in base 64
             encoded_release_notes=$(echo "$release_notes" | base64 --wrap=0)
             echo "release_notes=$encoded_release_notes" >> $GITHUB_OUTPUT
-            # enc for debug
-            echo "Encoded Release Notes: $encoded_release_notes"
-            echo "Encoded Release Notes>>>>>"
             echo "$release_notes" >> $GITHUB_STEP_SUMMARY
 
       # TODO we can also fetch the release notes from tofu-ls releases if the ls verion changed and embed them here
@@ -101,9 +98,9 @@ jobs:
 
           # Create changelog file in .changes
           release_file=".changes/${{ steps.version.outputs.next_version }}"
-          decoded_release_notes=$(echo "${{steps.release_notes.output.release_notes}}" | base64 --decode)
+          decoded_release_notes=$(echo "${{steps.release_notes.outputs.release_notes}}" | base64 --decode)
           # Remove a line starting with "## What's Changed" from decoded notes
-          filtered_release_notes=$(echo "$decoded_release_notes")
+          filtered_release_notes=$(echo "$decoded_release_notes" | sed "/^## What's Changed/d")
           {
             echo "## ${{ steps.version.outputs.next_version }} ($current_date)"
             echo ""
