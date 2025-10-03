@@ -1,0 +1,160 @@
+---
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      ls_version:
+        description: 'New `tofu-ls` version (optional)'
+        required: false
+        type: string
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get current version and update it to the next one
+        id: version
+        run: |
+          current_version=$(jq -r '.version' package.json)
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+
+          # Calculate next version using `npm version` command. The `next_version` includes the 'v' prefix
+          next_version=$(npm version "${{ inputs.version_bump }}" --no-git-tag-version)
+          echo "next_version=$next_version" >> $GITHUB_OUTPUT
+          echo "branch_name=release/$next_version" >> $GITHUB_OUTPUT
+
+      - name: Update langServer version if provided
+        if: inputs.ls_version != ''
+        run: |
+          jq '.langServer.version = "${{ inputs.ls_version }}"' package.json > package_temp.json
+          mv package_temp.json package.json
+
+      - name: Configure bot and Create a release branch
+        run: |
+          git config user.name "OpenTofu Maintainers [bot]"
+          git config user.email "maintainers@opentofu.org"
+          git checkout -b ${{ steps.version.outputs.branch_name }}
+
+      - name: Get latest release tag
+        id: latest_release
+        run: |
+          latest_tag=$(gh release view --json tagName | jq -r '.tagName')
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Use GitHub API to generate release notes
+          response=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -X POST \
+            "https://api.github.com/repos/${{ github.repository }}/releases/generate-notes" \
+            -d '{
+              "tag_name": "${{ steps.version.outputs.next_version }}",
+              "target_commitish": "${{ github.ref_name }}",
+              "configuration_file_path": ".github/release-notes.yml",
+              "previous_tag_name": "${{ steps.latest_release.outputs.latest_tag }}"
+            }')
+            # Extract the body from the response and append to summary
+            release_notes=$(echo "$response" | jq -r '.body')
+            echo "release_notes=$release_notes" >> $GITHUB_OUTPUT
+            echo "$release_notes" >> $GITHUB_STEP_SUMMARY
+
+      # TODO we can also fetch the release notes from tofu-ls releases if the ls verion changed and embed them here
+      - name: Create version changelog file and Update CHANGELOG.md
+        id: changelog_entry
+        run: |
+          # Get the current date
+          current_date=$(date +"%Y-%m-%d")
+
+          # Create changelog file in .changes
+          release_file=".changes/${{ steps.version.outputs.next_version }}"
+
+          {
+            echo "## ${{ steps.version.outputs.next_version }} ($current_date)"
+            echo ""
+            echo "${{steps.release_notes.output.release_notes}}"
+          } > $release_file
+
+          # Create new changelog entry
+          # Here we retain the header (# Changelog) and appending the whole content of the $release_file
+          {
+            echo "# Changelog"
+            echo ""
+            cat "$release_file"
+            echo ""
+            # Add the rest of the existing changelog (skip the header)
+            tail -n +2 CHANGELOG.md
+          } > CHANGELOG_new.md
+
+          mv CHANGELOG_new.md CHANGELOG.md
+          echo "release_file=$release_file" >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        run: |
+          git add package.json package-lock.json CHANGELOG.md "${{ steps.changelog_entry.outputs.release_file }}"
+          git commit -m "chore: prepare release ${{ steps.version.outputs.next_version }}"
+          git push origin ${{ steps.version.outputs.branch_name }}
+
+      - name: Create Pull Request
+        run: |
+          gh pr create \
+            --label "release" \
+            --title "Release ${{ steps.version.outputs.next_version }}" \
+            --body "$(cat <<EOF
+          ## Release ${{ steps.version.outputs.next_version }}
+
+          This PR prepares the automated release for version ${{ steps.version.outputs.next_version }}.
+          This PR is safe to modify.
+
+          ### Changes:
+          - Updated version from ${{ steps.version.outputs.current_version }} to ${{ steps.version.outputs.next_version }}
+          $(if [ -n "${{ inputs.ls_version }}" ]; then echo "- Updated langServer version to ${{ inputs.ls_version }}"; fi)
+          - Added changelog for the new version and a new entry in CHANGELOG.md with auto-generated release notes
+
+          ### Generated Release Notes:
+          $(cat "${{ steps.changelog_entry.outputs.release_file }}")
+          EOF
+          )" \
+            --head ${{ steps.version.outputs.branch_name }} \
+            --base ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Output summary
+        run: |
+          echo "## Release" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Current Version:** ${{ steps.version.outputs.current_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Next Version:** ${{ steps.version.outputs.next_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Release Branch:** ${{ steps.version.outputs.branch_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A pull request has been created with all the necessary changes." >> $GITHUB_STEP_SUMMARY
+          echo "Review and merge the PR to trigger the release." >> $GITHUB_STEP_SUMMARY
