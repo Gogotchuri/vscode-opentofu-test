@@ -23,6 +23,7 @@ export interface Release {
   extract: boolean;
 }
 
+// a bug
 function getPlatform(platform: string) {
   if (platform === 'win32') {
     return 'windows';
