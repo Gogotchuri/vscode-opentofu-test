@@ -99,10 +99,12 @@ jobs:
           # Create changelog file in .changes
           release_file=".changes/${{ steps.version.outputs.next_version }}"
           decoded_release_notes=$(echo "${{steps.release_notes.output.release_notes}}" | base64 --decode)
+          # Remove a line starting with "## What's Changed" from decoded notes
+          filtered_release_notes=$(echo "$decoded_release_notes" | sed "/^## What's Changed/d")
           {
             echo "## ${{ steps.version.outputs.next_version }} ($current_date)"
             echo ""
-            echo "$decoded_release_notes"
+            echo "$filtered_release_notes"
           } > $release_file
 
           # Create new changelog entry
