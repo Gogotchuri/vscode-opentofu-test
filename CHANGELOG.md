@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.3 (2025-10-03)
+
+
+
+
 ## 0.4.1 (2025-09-16)
 - Fix: language server crashing on resources with no provider prefix
 - Fix: Removes the `fallback` attribute from the fallback block
