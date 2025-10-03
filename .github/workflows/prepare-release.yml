@@ -84,7 +84,9 @@ jobs:
             }')
             # Extract the body from the response and append to summary
             release_notes=$(echo "$response" | jq -r '.body')
-            echo "release_notes=$release_notes" >> $GITHUB_OUTPUT
+            # To avoid errors due to multiline notes strings, we encode and decode it in base 64
+            encoded_release_notes=$(echo "$release_notes" | base64 --wrap=0)
+            echo "release_notes=$encoded_release_notes" >> $GITHUB_OUTPUT
             echo "$release_notes" >> $GITHUB_STEP_SUMMARY
 
       # TODO we can also fetch the release notes from tofu-ls releases if the ls verion changed and embed them here
@@ -96,11 +98,11 @@ jobs:
 
           # Create changelog file in .changes
           release_file=".changes/${{ steps.version.outputs.next_version }}"
-
+          decoded_release_notes=$(echo "${{steps.release_notes.output.release_notes}}" | base64 --decode)
           {
             echo "## ${{ steps.version.outputs.next_version }} ($current_date)"
             echo ""
-            echo "${{steps.release_notes.output.release_notes}}"
+            echo "$decoded_release_notes"
           } > $release_file
 
           # Create new changelog entry
