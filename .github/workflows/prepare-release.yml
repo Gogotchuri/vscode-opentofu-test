@@ -134,11 +134,13 @@ jobs:
             # Remove a line starting with "## What's Changed" from notes
             release_notes=$(echo "$release_notes" | sed "/^## What's Changed/d")
             # If we updated the ls version, we need to insert that note at the start.
-            # This checks version by the workflow or difference from the last version
+            # This checks version change by the workflow and difference from the last version
             if [[ "${{ steps.ls_version.outputs.ls_version_changed }}" = "true" ]]; then
               release_link="https://github.com/opentofu/tofu-ls/releases/tag/v${{ steps.ls_version.outputs.ls_version }}"
-              tofu_ls_note="### New Language Server Version<br>-You can check the tofu-ls ${{ steps.ls_version.outputs.ls_version }} release here - $release_link"
-              release_notes="${tofu_ls_note}${release_notes}"
+              tofu_ls_note="### New Language Server Version
+              - You can check the tofu-ls ${{ steps.ls_version.outputs.ls_version }} release here - $release_link"
+              release_notes="${tofu_ls_note}
+              ${release_notes}"
             fi
             # To avoid errors due to multiline notes strings, we encode and decode it in base 64
             encoded_release_notes=$(echo "$release_notes" | base64 --wrap=0)
