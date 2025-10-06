@@ -14,7 +14,6 @@ async function fileFromUrl(url: string): Promise<Buffer> {
   return Buffer.from(response.data, 'binary');
 }
 
-// New feature trigger
 export interface Release {
   repository: string;
   package: string;
@@ -24,7 +23,6 @@ export interface Release {
   extract: boolean;
 }
 
-// a bug
 function getPlatform(platform: string) {
   if (platform === 'win32') {
     return 'windows';
