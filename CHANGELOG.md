@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.5.0 (2025-10-06)
+
+*Includes a new LS version - [tofu-ls 0.1.0](https://github.com/opentofu/tofu-ls/releases/tag/v0.1.0)*
+    
+### New Features
+* New feature by @Gogotchuri in https://github.com/Gogotchuri/vscode-opentofu-test/pull/2
+### Bugs Fixed
+* New bug by @Gogotchuri in https://github.com/Gogotchuri/vscode-opentofu-test/pull/3
+
+
+**Full Changelog**: https://github.com/Gogotchuri/vscode-opentofu-test/compare/v0.0.1...v0.5.0
+
+
 ## 0.4.1 (2025-09-16)
 - Fix: language server crashing on resources with no provider prefix
 - Fix: Removes the `fallback` attribute from the fallback block
