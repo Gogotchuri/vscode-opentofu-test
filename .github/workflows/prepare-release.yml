@@ -137,7 +137,7 @@ jobs:
             # This checks version by the workflow or difference from the last version
             if [[ "${{ steps.ls_version.outputs.ls_version_changed }}" = "true" ]]; then
               release_link="https://github.com/opentofu/tofu-ls/releases/tag/v${{ steps.ls_version.outputs.ls_version }}"
-              tofu_ls_note="### New Language Server Version\n-You can check the `tofu-ls` ${{ steps.ls_version.outputs.ls_version }} release here - $release_link\n"
+              tofu_ls_note="### New Language Server Version\n-You can check the tofu-ls ${{ steps.ls_version.outputs.ls_version }} release here - $release_link\n"
               release_notes="${tofu_ls_note}${release_notes}"
             fi
             # To avoid errors due to multiline notes strings, we encode and decode it in base 64
