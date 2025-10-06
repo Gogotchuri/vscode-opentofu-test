@@ -131,15 +131,12 @@ jobs:
             }')
             # Extract the body from the response and append to summary
             release_notes=$(echo "$response" | jq -r '.body')
-            # Remove a line starting with "## What's Changed" from notes
-            release_notes=$(echo "$release_notes" | sed "/^## What's Changed/d")
+            # Remove a line starting with "## What's Changed" and a comment from notes
+            release_notes=$(echo "$release_notes" | sed "/^## What's Changed/d" | sed "/^<!--.*-->/d")
             # If we updated the ls version, we need to insert that note at the start.
             # This checks version change by the workflow and difference from the last version
             if [[ "${{ steps.ls_version.outputs.ls_version_changed }}" = "true" ]]; then
-              release_link="https://github.com/opentofu/tofu-ls/releases/tag/v${{ steps.ls_version.outputs.ls_version }}"
-              tofu_ls_note="### New Language Server Version
-              - You can check the tofu-ls ${{ steps.ls_version.outputs.ls_version }} release here - $release_link"
-              release_notes="${tofu_ls_note}
+              release_notes="* Language Server changed to [tofu-ls ${{steps.ls_version.outputs.ls_version}}](https://github.com/opentofu/tofu-ls/releases/tag/v${{ steps.ls_version.outputs.ls_version }}) *
               ${release_notes}"
             fi
             # To avoid errors due to multiline notes strings, we encode and decode it in base 64
