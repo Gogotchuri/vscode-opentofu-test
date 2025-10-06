@@ -44,7 +44,8 @@ jobs:
         run: |
           latest_tag=$(gh release view --json tagName | jq -r '.tagName')
           echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
-
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get LS versions and check if `langServer.version` needs update
         id: ls_version
         run: |
@@ -87,6 +88,9 @@ jobs:
           # Hence, it is set to the current version if no update occurs
           echo "ls_version=$ls_version" >> $GITHUB_OUTPUT
           echo "updates_ls_version=$updates_ls_version" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get current version and update it to the next one
         id: version
         run: |
