@@ -1,0 +1,11 @@
+## v0.5.0 (2025-10-06)
+
+<!-- Release notes generated using configuration in .github/release-notes.yml at main -->
+
+### New Features
+* New feature by @Gogotchuri in https://github.com/Gogotchuri/vscode-opentofu-test/pull/2
+### Bugs Fixed
+* New bug by @Gogotchuri in https://github.com/Gogotchuri/vscode-opentofu-test/pull/3
+
+
+**Full Changelog**: https://github.com/Gogotchuri/vscode-opentofu-test/compare/v0.0.1...v0.5.0
