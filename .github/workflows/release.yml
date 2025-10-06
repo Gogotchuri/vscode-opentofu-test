@@ -63,9 +63,11 @@ jobs:
         run: |
           changes_file=".changes/v${{ steps.version.outputs.version }}"
           if [[ -f "$changes_file" ]]; then
+            # We need to remove mention of version and date, since those are duplicate
+            notes=$(tail -n +3 "$changes_file")
             gh release create v${{ steps.version.outputs.version }} \
               --title "v${{ steps.version.outputs.version }}" \
-              --notes-file "$changes_file"
+              --notes "$notes"
           else
             echo "No changes file found. Creating a draft release."
             gh release create v${{ steps.version.outputs.version }} \
