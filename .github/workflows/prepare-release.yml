@@ -136,7 +136,7 @@ jobs:
             # If we updated the ls version, we need to insert that note at the start.
             # This checks version change by the workflow and difference from the last version
             if [[ "${{ steps.ls_version.outputs.ls_version_changed }}" = "true" ]]; then
-              release_notes="* Language Server changed to [tofu-ls ${{steps.ls_version.outputs.ls_version}}](https://github.com/opentofu/tofu-ls/releases/tag/v${{ steps.ls_version.outputs.ls_version }}) *
+              release_notes="*Includes a new LS version - [tofu-ls ${{steps.ls_version.outputs.ls_version}}](https://github.com/opentofu/tofu-ls/releases/tag/v${{ steps.ls_version.outputs.ls_version }})*
               ${release_notes}"
             fi
             # To avoid errors due to multiline notes strings, we encode and decode it in base 64
