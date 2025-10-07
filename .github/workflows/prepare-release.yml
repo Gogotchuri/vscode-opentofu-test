@@ -104,7 +104,7 @@ jobs:
           echo "branch_name=release/$next_version" >> $GITHUB_OUTPUT
 
       - name: Update `tofu-ls` version
-        if: ${{ steps.ls_version.outputs.updates_ls_version}}
+        if: ${{ steps.ls_version.outputs.updates_ls_version }}
         run: |
           jq '.langServer.version = "${{ steps.ls_version.outputs.ls_version }}"' package.json > package_temp.json
           mv package_temp.json package.json
