@@ -76,7 +76,7 @@ jobs:
           # Even if the ls version wasn't set during the workflow run it still can be different from the one in the last release of the extension
           # We can check if that is the case
           if [[ $updates_ls_version == false ]]; then
-            # We can get the langServer set in the last release using `git show` and latest tag we obtained in the last set
+            # We can get the langServer set in the last release using `git show` and latest tag we obtained in the last step
             previous_version=$(git show ${{ steps.latest_release.outputs.latest_tag }}:package.json | jq -r '.langServer.version')
             # We add a new flag to indicate the case, when tofu-ls version changed but not necessarily by the workflow and we can prepend it in release notes
             if [[ "$previous_version" != "$current_ls_version" ]]; then
