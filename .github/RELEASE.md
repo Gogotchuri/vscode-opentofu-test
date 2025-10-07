@@ -9,4 +9,4 @@ Release process:
     - If the release should include `tofu-ls` version update, set the `ls-version` input, ex: 0.1.0, latest, etc.
 1. Once the workflow is finished, review the PR it created. Make adjustments if necessary and merge it.
 
-That is the whole flow. Once the PR is merged, `Release` workflow will be triggered automatically.
+That is the whole flow. Once the PR is merged, the `Release` workflow will be triggered automatically.
