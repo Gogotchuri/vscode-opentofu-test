@@ -192,7 +192,7 @@ jobs:
 
           ### Changes:
           - Updated version from ${{ steps.version.outputs.current_version }} to ${{ steps.version.outputs.next_version }}
-          $(if [ -n "${{ steps.version.outputs.updates_ls_version }}" ]; then echo "- Updated `tofu-ls` version to ${{ inputs.ls_version }}"; fi)
+          $(if [ -n "${{ steps.ls_version.outputs.updates_ls_version }}" ]; then echo "- Updated `tofu-ls` version to ${{ inputs.ls_version }}"; fi)
           - Added changelog for the new version and a new entry in CHANGELOG.md with auto-generated release notes
 
           ### Generated Release Notes:
